@@ -1,7 +1,9 @@
 import socket
-import message_pb2
 import sys
 import signal
+import select
+import struct
+import sys
 
 def handler(signum, frame):
     print( "Bye!" )
@@ -10,17 +12,33 @@ def handler(signum, frame):
 
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-ctr=0
 s.bind(('', 9999))
 
 s.listen(10)
-try:
-    conn[ctr], addr[ctr] = s.accept()
-    ctr=ctr+1
+read_handles = [s]
 
-    read_handles = [sys.stdin, conn[]]
-    signal.signal(signal.SIGINT, handler)
-                    
-except KeyboardInterrupt:
-    s.close()
-    sys.exit()
+signal.signal(signal.SIGINT, handler)
+
+while True:
+    readables, _, _ = select.select(read_handles,[], [])
+    for socks in readables:
+        if socks == s:
+            conn, addr = s.accept()
+            read_handles.append(conn)
+            #print(addr)
+        else:
+            datalen = socks.recv(4,socket.MSG_WAITALL)
+            if datalen:
+                length = struct.unpack("!i", datalen)
+                #print("length is: " + str(length[0]))
+                data = socks.recv(length[0], socket.MSG_WAITALL)
+                #if data:
+                #   message.ParseFromString(data)
+                #   print(message.name +": " + message.text)
+                for connection in read_handles:
+                    if socks != connection and s!=connection:
+                        try:
+                            datalen_sent=connection.send(datalen)
+                            data_sent = connection.send(data)
+                        except:
+                            read_handles.remove(connection)
