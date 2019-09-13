@@ -58,7 +58,7 @@ while True:
             data = s.recv(length[0], socket.MSG_WAITALL)
             if data:
                 message.ParseFromString(data)
-                print(message.name +": " + message.text)
+                print( "%s: %s\n" % (message.name, message.text), flush=True )
         
 
 
