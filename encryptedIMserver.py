@@ -10,9 +10,11 @@ def handler(signum, frame):
     s.close()
     sys.exit(0)
 
+port = sys.argv[2]
+#print(port)
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind(('', 9999))
+s.bind(('', int(port)))
 
 s.listen(10)
 read_handles = [s]
