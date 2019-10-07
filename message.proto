@@ -3,6 +3,8 @@ syntax = "proto2";
 package messsage;
 
 message IMmessage {
-  required string name = 1;
-  required string text = 2;
+  required bytes name = 1;
+  required bytes text = 2;
+  required bytes nameIV = 3;
+  required bytes textIV = 4;
 }
