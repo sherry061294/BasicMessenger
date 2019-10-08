@@ -7,4 +7,5 @@ message IMmessage {
   required bytes text = 2;
   required bytes nameIV = 3;
   required bytes textIV = 4;
+  required bytes HMAC = 5;
 }

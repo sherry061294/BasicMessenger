@@ -7,6 +7,7 @@ import hashlib
 from Crypto.Random import get_random_bytes 
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad,unpad
+import hmac
 
 message=message_pb2.IMmessage()
 
@@ -24,8 +25,15 @@ def decrypting(ciphertext, ckey, IV):
         return -1
     return byte_plaintext.decode('utf-8')
 
-#def Macing(self, data, key):
-    
+def Macing(data, key):
+    hashmac = hmac.new(key, data, hashlib.sha256)
+    return hashmac.digest()
+
+def ComparingMac(mac1, mac2):
+    if (mac1 == mac2):
+        return True
+    else:
+        return False
         
 def main():
     sindex=0
@@ -95,6 +103,14 @@ def main():
             message.name = encrypting(name, hashed_confidentialityKey, message.nameIV)
             message.textIV = get_random_bytes(16)
             message.text = encrypting(keyboardInput, hashed_confidentialityKey, message.textIV)
+            #print(message.name)
+            #print(message.text)
+            #print(message.nameIV)
+            #print(message.textIV)
+            pre_mac = b''.join([message.name,message.text,message.nameIV,message.textIV])
+            print(pre_mac)
+            message.HMAC = Macing(pre_mac, hashed_authenticityKey)
+            print(message.HMAC)
             tosend = message.SerializeToString()
             size=len(tosend) 
             packedlength = struct.pack("!i",size)
@@ -109,15 +125,19 @@ def main():
                 data = s.recv(length[0], socket.MSG_WAITALL)
                 if data:
                     message.ParseFromString(data)
-                    received_name = decrypting(message.name, hashed_confidentialityKey, message.nameIV)
-                    received_text = decrypting(message.text, hashed_confidentialityKey, message.textIV)
-                    if (received_name == -1 or received_text == -1):
-                        print("Incorrect Key")
+                    receiver_pre_mac = b''.join([message.name,message.text,message.nameIV,message.textIV])
+                    print(receiver_pre_mac)
+                    receiver_mac = Macing(receiver_pre_mac, hashed_authenticityKey)
+                    print(receiver_mac)
+                    if ComparingMac(receiver_mac, message.HMAC):
+                        received_name = decrypting(message.name, hashed_confidentialityKey, message.nameIV)
+                        received_text = decrypting(message.text, hashed_confidentialityKey, message.textIV)
+                        if (received_name == -1 or received_text == -1):
+                            print("Incorrect Confidentiality Key")
+                        else:
+                            print( "%s: %s" % (received_name, received_text), flush=True )
                     else:
-                        print( "%s: %s" % (received_name, received_text), flush=True )
-            
-
-
+                        print("Invalid Authentication Key")
 
     #print(servername)
     #print(message.name)
