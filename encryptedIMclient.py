@@ -133,11 +133,11 @@ def main():
                         received_name = decrypting(message.name, hashed_confidentialityKey, message.nameIV)
                         received_text = decrypting(message.text, hashed_confidentialityKey, message.textIV)
                         if (received_name == -1 or received_text == -1):
-                            print("Incorrect Confidentiality Key")
+                            print("%s" % ("Invalid Confidentiality Key"), flush=True )
                         else:
                             print( "%s: %s" % (received_name, received_text), flush=True )
                     else:
-                        print("Invalid Authentication Key")
+                        print("%s" % ("Invalid Authentication Key"), flush=True )
 
     #print(servername)
     #print(message.name)
