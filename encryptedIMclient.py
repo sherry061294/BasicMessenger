@@ -108,9 +108,9 @@ def main():
             #print(message.nameIV)
             #print(message.textIV)
             pre_mac = b''.join([message.name,message.text,message.nameIV,message.textIV])
-            print(pre_mac)
+            #print(pre_mac)
             message.HMAC = Macing(pre_mac, hashed_authenticityKey)
-            print(message.HMAC)
+            #print(message.HMAC)
             tosend = message.SerializeToString()
             size=len(tosend) 
             packedlength = struct.pack("!i",size)
@@ -126,9 +126,9 @@ def main():
                 if data:
                     message.ParseFromString(data)
                     receiver_pre_mac = b''.join([message.name,message.text,message.nameIV,message.textIV])
-                    print(receiver_pre_mac)
+                    #print(receiver_pre_mac)
                     receiver_mac = Macing(receiver_pre_mac, hashed_authenticityKey)
-                    print(receiver_mac)
+                    #print(receiver_mac)
                     if ComparingMac(receiver_mac, message.HMAC):
                         received_name = decrypting(message.name, hashed_confidentialityKey, message.nameIV)
                         received_text = decrypting(message.text, hashed_confidentialityKey, message.textIV)
